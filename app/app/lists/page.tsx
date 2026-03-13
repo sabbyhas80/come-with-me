@@ -212,12 +212,111 @@ function ListCard({ list, onClick }: { list: PlaceList; onClick: () => void }) {
   );
 }
 
-function ListDetail({ list, onBack }: { list: PlaceList; onBack: () => void }) {
-  const listPlaces = PLACES.slice(0, Math.min(list.placeCount, PLACES.length));
+const TOKYO_PLACES = [
+  { id: "t1", name: "Ichiran Ramen", neighborhood: "Shibuya", by: "@mayanyc", byColor: "text-white/40", gradient: "from-red-900 to-rose-900", emoji: "🍜", saved: true },
+  { id: "t2", name: "Senso-ji Temple", neighborhood: "Asakusa", by: "Added by Alex", byColor: "text-purple", gradient: "from-orange-900 to-amber-900", emoji: "⛩️", saved: false },
+  { id: "t3", name: "Ace Hotel Tokyo", neighborhood: "Shinjuku", by: "Added by Sarah", byColor: "text-purple", gradient: "from-sky-900 to-blue-900", emoji: "🏨", saved: false },
+  { id: "t4", name: "Tsukiji Outer Market", neighborhood: "Tsukiji", by: "@traveljunkie", byColor: "text-purple", gradient: "from-green-900 to-emerald-900", emoji: "🐟", saved: true },
+];
 
+function ListDetail({ list, onBack }: { list: PlaceList; onBack: () => void }) {
+  const isTokyoTrip = list.id === "3";
+
+  if (isTokyoTrip) {
+    return (
+      <div className="flex flex-col pb-24">
+        {/* Header */}
+        <div className="relative h-52 bg-gradient-to-br from-red-950 via-rose-900 to-red-800">
+          <div className="absolute inset-0 bg-black/40" />
+          <button
+            onClick={onBack}
+            className="absolute top-14 left-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur flex items-center justify-center z-10"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M19 12H5M12 5l-7 7 7 7" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+          <div className="absolute bottom-5 left-5 right-5 z-10">
+            <h1 className="font-bricolage font-extrabold text-white text-2xl leading-tight mb-1">
+              Tokyo Trip 🗾
+            </h1>
+            <p className="text-white/60 text-xs font-jakarta">
+              8 places · 3 collaborators · Last updated 1h ago
+            </p>
+            <div className="flex items-center gap-2 mt-3">
+              <button className="flex items-center gap-1.5 bg-white/10 border border-white/20 text-white font-jakarta font-semibold text-xs px-3 py-1.5 rounded-full">
+                🔗 Share
+              </button>
+              <button className="flex items-center gap-1.5 bg-lime text-dark font-jakarta font-bold text-xs px-3 py-1.5 rounded-full">
+                + Add Place
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Collab bar */}
+        <div className="mx-5 mt-4 flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-4 py-3">
+          <div className="flex -space-x-2 flex-shrink-0">
+            {[["Y", "bg-purple"], ["A", "bg-orange-500"], ["S", "bg-blue-500"]].map(([initial, color]) => (
+              <div key={initial} className={`w-7 h-7 rounded-full ${color} border-2 border-[#18181b] flex items-center justify-center text-[10px] font-bold text-white`}>
+                {initial}
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-xs font-jakarta font-semibold">You, Alex, Sarah</p>
+            <p className="text-white/40 text-[10px] font-jakarta">Can edit · 3 collaborators</p>
+          </div>
+          <button className="flex-shrink-0 bg-purple text-white font-jakarta font-bold text-xs px-3 py-1.5 rounded-full">
+            + Invite
+          </button>
+        </div>
+
+        {/* Places */}
+        <div className="px-5 mt-5 flex flex-col gap-2">
+          <h2 className="font-bricolage font-bold text-white text-base mb-1">Places</h2>
+          {TOKYO_PLACES.map((place) => (
+            <div key={place.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-2xl p-3">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${place.gradient} flex-shrink-0 flex items-center justify-center text-lg`}>
+                {place.emoji}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bricolage font-bold text-white text-sm">{place.name}</p>
+                <p className={`text-xs font-jakarta mt-0.5`}>
+                  <span className="text-white/40">{place.neighborhood} · </span>
+                  <span className={place.byColor}>{place.by}</span>
+                </p>
+              </div>
+              <span className="text-lg">{place.saved ? "❤️" : "🤍"}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent Activity */}
+        <div className="px-5 mt-5 mb-6">
+          <h2 className="font-bricolage font-bold text-white text-base mb-3">Recent Activity</h2>
+          <div className="flex items-start gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3">
+            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5">
+              A
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-jakarta">
+                <span className="font-semibold">Alex</span> added Senso-ji Temple
+              </p>
+              <p className="text-white/30 text-[10px] font-jakarta mt-0.5">
+                2 hours ago · from Instagram @tokyolife
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default detail for other lists
+  const listPlaces = PLACES.slice(0, Math.min(list.placeCount, PLACES.length));
   return (
     <div>
-      {/* Header banner */}
       <div className={`h-48 bg-gradient-to-br ${list.gradient} relative`}>
         <div className="absolute inset-0 bg-black/30" />
         <button
@@ -231,42 +330,24 @@ function ListDetail({ list, onBack }: { list: PlaceList; onBack: () => void }) {
         <div className="absolute bottom-4 left-5 right-5">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-white/70 text-sm font-jakarta">{list.emoji}</p>
-              <h1 className="font-bricolage font-extrabold text-white text-2xl leading-tight">
-                {list.name}
-              </h1>
-              <p className="text-white/60 text-xs font-jakarta mt-1">
-                {list.placeCount} places · Updated 2 days ago
-              </p>
+              <h1 className="font-bricolage font-extrabold text-white text-2xl leading-tight">{list.name}</h1>
+              <p className="text-white/60 text-xs font-jakarta mt-1">{list.placeCount} places · Updated 2 days ago</p>
             </div>
             <CollabAvatars names={list.collaborators} />
           </div>
         </div>
       </div>
-
-      {/* Actions */}
       <div className="flex gap-2 px-5 py-4">
-        <button className="flex-1 bg-purple text-white font-jakarta font-semibold text-sm py-2.5 rounded-xl">
-          + Add Place
-        </button>
-        <button className="flex-1 bg-white/5 border border-white/10 text-white/60 font-jakarta font-semibold text-sm py-2.5 rounded-xl">
-          Share List
-        </button>
+        <button className="flex-1 bg-purple text-white font-jakarta font-semibold text-sm py-2.5 rounded-xl">+ Add Place</button>
+        <button className="flex-1 bg-white/5 border border-white/10 text-white/60 font-jakarta font-semibold text-sm py-2.5 rounded-xl">Share List</button>
       </div>
-
-      {/* Places */}
       <div className="px-5 flex flex-col gap-2 mb-6">
         <h2 className="font-bricolage font-bold text-white text-base mb-1">Places</h2>
         {listPlaces.map((place) => (
-          <div
-            key={place.id}
-            className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-2xl p-3"
-          >
+          <div key={place.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-2xl p-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${place.gradient} flex-shrink-0 flex items-center justify-center`}>
               <span className="text-base">
-                {place.category === "Restaurants" ? "🍽️" :
-                 place.category === "Coffee" ? "☕" :
-                 place.category === "Shopping" ? "🛍️" : "🍸"}
+                {place.category === "Restaurants" ? "🍽️" : place.category === "Coffee" ? "☕" : place.category === "Shopping" ? "🛍️" : "🍸"}
               </span>
             </div>
             <div className="flex-1 min-w-0">
@@ -276,28 +357,6 @@ function ListDetail({ list, onBack }: { list: PlaceList; onBack: () => void }) {
             <span className="text-lime text-xs font-semibold font-jakarta">★ {place.rating}</span>
           </div>
         ))}
-      </div>
-
-      {/* Activity feed */}
-      <div className="px-5 mb-6">
-        <h2 className="font-bricolage font-bold text-white text-base mb-3">Activity</h2>
-        <div className="flex flex-col gap-3">
-          {[
-            { avatar: "M", name: "Maya", action: "added Sushi Nakazawa", time: "2h ago", color: "bg-pink-500" },
-            { avatar: "S", name: "You", action: "saved Joe Coffee", time: "1d ago", color: "bg-purple" },
-            { avatar: "K", name: "Kat", action: "invited 2 friends", time: "3d ago", color: "bg-emerald-500" },
-          ].map((a) => (
-            <div key={a.name + a.time} className="flex items-center gap-3">
-              <div className={`w-7 h-7 rounded-full ${a.color} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
-                {a.avatar}
-              </div>
-              <p className="text-white/60 text-sm font-jakarta flex-1">
-                <span className="text-white font-semibold">{a.name}</span> {a.action}
-              </p>
-              <span className="text-white/30 text-xs font-jakarta">{a.time}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
