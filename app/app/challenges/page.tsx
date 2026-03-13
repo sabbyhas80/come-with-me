@@ -1,55 +1,55 @@
 "use client";
 
-import { useState } from "react";
-
 const CHALLENGES = [
   {
     id: "1",
     brand: "RESY x COME WITH ME",
     title: "Omakase Tour NYC",
-    description: "Visit 5 omakase restaurants saved from Resy-featured creators",
-    reward: "Priority reservation access + $75 dining credit",
+    reward: "🎁 $50 Resy Credit + Explorer Badge",
     progress: 3,
     total: 5,
+    pct: 60,
     started: true,
-    badgeEmoji: "🍣",
-    daysLeft: 4,
+    daysLeft: 12,
+    participants: "843",
+    barColor: "bg-lime",
   },
   {
     id: "2",
-    brand: "Bluestone Lane",
+    brand: "BLUESTONE LANE",
     title: "Best Coffee in Brooklyn",
-    description: "Check in at 4 top-rated coffee spots across Brooklyn",
-    reward: "Free week of flat whites",
-    progress: 0,
-    total: 4,
-    started: false,
-    badgeEmoji: "☕",
-    daysLeft: 7,
+    reward: "🎁 Free coffee for a month",
+    progress: 1,
+    total: 5,
+    pct: 20,
+    started: true,
+    daysLeft: 30,
+    participants: "2.1K",
+    barColor: "bg-purple",
   },
   {
     id: "3",
     brand: "DEPOP x COME WITH ME",
-    title: "Thrift Tour East Village",
-    description: "Save 6 vintage & thrift spots in the East Village",
-    reward: "0% selling fees for 30 days",
+    title: "Thrift Tour: East Village",
+    reward: "🎁 $25 Depop Voucher",
     progress: 0,
-    total: 6,
+    total: 5,
+    pct: 0,
     started: false,
-    badgeEmoji: "🛍️",
-    daysLeft: 10,
+    daysLeft: 45,
+    participants: null,
+    barColor: "bg-purple",
   },
 ];
 
-const EARNED_BADGES = [
-  { emoji: "🌍", label: "Explorer", color: "from-purple-700 to-indigo-700" },
-  { emoji: "📍", label: "Pioneer", color: "from-rose-700 to-pink-700" },
-  { emoji: "☕", label: "Caffeine", color: "from-amber-700 to-orange-700" },
+const BADGES = [
+  { emoji: "🏅", title: "Explorer", sub: "+50 XP", earned: true },
+  { emoji: "🗺️", title: "Cartographer", sub: "10 saves", earned: false },
+  { emoji: "🍣", title: "Omakase Pro", sub: "+100 XP", earned: true },
+  { emoji: "☕", title: "Coffee Snob", sub: "5 cafés", earned: false },
 ];
 
 export default function ChallengesPage() {
-  const [activeId, setActiveId] = useState("1");
-
   return (
     <div className="flex flex-col pb-8">
       {/* Header */}
@@ -58,118 +58,114 @@ export default function ChallengesPage() {
           LIVE · 3 ACTIVE CHALLENGES
         </p>
         <h1 className="font-bricolage font-extrabold text-3xl text-white leading-tight">
-          Explore &{" "}
+          Explore &amp;{" "}
           <span className="italic text-lime">Earn</span>
         </h1>
       </div>
 
       {/* Challenge cards */}
       <div className="px-5 flex flex-col gap-3 pb-6">
-        {CHALLENGES.map((c) => {
-          const isActive = activeId === c.id;
-          const pct = c.total > 0 ? Math.round((c.progress / c.total) * 100) : 0;
+        {CHALLENGES.map((c) => (
+          <div
+            key={c.id}
+            className="rounded-2xl border border-white/[0.08] bg-white/[0.04] overflow-hidden"
+          >
+            <div className="p-4 flex flex-col gap-3">
+              {/* Brand */}
+              <p className="text-white/30 text-[10px] font-jakarta uppercase tracking-widest">
+                {c.brand}
+              </p>
 
-          return (
-            <div
-              key={c.id}
-              className={`rounded-2xl border overflow-hidden transition-all ${
-                isActive ? "border-lime/30 bg-white/[0.05]" : "border-white/[0.07] bg-white/[0.03]"
-              }`}
-            >
-              <button
-                className="w-full text-left p-4"
-                onClick={() => setActiveId(isActive ? "" : c.id)}
-              >
-                {/* Brand */}
-                <p className="text-white/30 text-[10px] font-jakarta uppercase tracking-widest mb-2">
-                  {c.brand}
-                </p>
+              {/* Title */}
+              <p className="font-bricolage font-bold text-white text-lg leading-tight -mt-1">
+                {c.title}
+              </p>
 
-                {/* Title row */}
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-11 h-11 rounded-xl bg-lime/10 border border-lime/20 flex items-center justify-center text-xl flex-shrink-0">
-                    {c.badgeEmoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-bricolage font-bold text-white text-base leading-tight">
-                        {c.title}
-                      </p>
-                      <span className="flex-shrink-0 text-[10px] font-jakarta font-semibold text-lime/70 bg-lime/10 border border-lime/20 px-2 py-0.5 rounded-full">
-                        {c.daysLeft}d left
-                      </span>
-                    </div>
-                    <p className="text-white/40 text-xs font-jakarta mt-0.5">
-                      {c.started ? `${c.progress} / ${c.total} completed` : "Not started"}
-                    </p>
-                  </div>
-                </div>
+              {/* Reward */}
+              <p className="text-lime text-sm font-jakarta font-semibold">
+                {c.reward}
+              </p>
 
-                {/* Progress bar */}
-                {c.started && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-lime rounded-full transition-all duration-700"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-lime text-xs font-jakarta font-bold">{pct}%</span>
+              {/* Progress bar (started only) */}
+              {c.started && (
+                <>
+                  <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${c.barColor} rounded-full transition-all duration-700`}
+                      style={{ width: `${c.pct}%` }}
+                    />
                   </div>
-                )}
-              </button>
+                  <div className="flex items-center justify-between -mt-1">
+                    <span className="text-white/40 text-xs font-jakarta">
+                      {c.progress} of {c.total} visited
+                    </span>
+                    <span className="text-white/60 text-xs font-jakarta font-semibold">
+                      {c.pct}%
+                    </span>
+                  </div>
+                </>
+              )}
 
-              {/* Expanded */}
-              {isActive && (
-                <div className="px-4 pb-4 pt-1 border-t border-white/[0.06] flex flex-col gap-3">
-                  <p className="text-white/55 font-jakarta text-sm leading-relaxed">
-                    {c.description}
-                  </p>
-                  <div className="flex items-center gap-3 bg-lime/[0.07] border border-lime/20 rounded-xl px-4 py-3">
-                    <span className="text-lg">🎁</span>
-                    <div>
-                      <p className="text-white/40 text-[10px] font-jakarta uppercase tracking-wide">Reward</p>
-                      <p className="font-jakarta font-semibold text-white text-sm">{c.reward}</p>
-                    </div>
-                  </div>
-                  {c.started ? (
-                    <button className="w-full bg-lime text-dark font-bricolage font-bold text-base py-3 rounded-xl active:scale-95 transition-all">
-                      View Map →
-                    </button>
-                  ) : (
-                    <button className="w-full bg-purple text-white font-bricolage font-bold text-base py-3 rounded-xl active:scale-95 transition-all">
-                      Join
-                    </button>
-                  )}
+              {/* Not started row */}
+              {!c.started && (
+                <div className="flex items-center justify-between">
+                  <span className="text-white/30 text-xs font-jakarta">Not started</span>
+                  <span className="text-white/30 text-xs font-jakarta">{c.daysLeft} days left</span>
                 </div>
               )}
+
+              {/* Bottom row */}
+              <div className="flex items-center justify-between">
+                {c.started ? (
+                  <span className="text-white/30 text-xs font-jakarta">
+                    {c.daysLeft} days left · {c.participants} participants
+                  </span>
+                ) : (
+                  <span />
+                )}
+
+                {c.started && c.id === "1" ? (
+                  <button className="bg-lime text-dark font-jakarta font-bold text-xs px-4 py-1.5 rounded-full active:scale-95 transition-all">
+                    View Map →
+                  </button>
+                ) : (
+                  <button className="bg-purple text-white font-jakarta font-bold text-xs px-4 py-1.5 rounded-full active:scale-95 transition-all">
+                    Join
+                  </button>
+                )}
+              </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
-      {/* Badge shelf */}
+      {/* Badges section */}
       <div className="px-5">
-        <p className="text-white/40 text-xs font-jakarta uppercase tracking-widest mb-3">Your Badges</p>
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
-          <div className="flex gap-4">
-            {EARNED_BADGES.map((badge) => (
-              <div key={badge.label} className="flex flex-col items-center gap-2">
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center text-2xl shadow-lg shadow-black/40`}>
-                  {badge.emoji}
-                </div>
-                <span className="text-white/50 text-[10px] font-jakarta">{badge.label}</span>
-              </div>
-            ))}
-            {["🏆"].map((emoji) => (
-              <div key={emoji} className="flex flex-col items-center gap-2">
-                <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-dashed border-white/15 flex items-center justify-center opacity-20 text-2xl">
-                  {emoji}
-                </div>
-                <span className="text-white/20 text-[10px] font-jakarta">Locked</span>
-              </div>
-            ))}
-          </div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="font-bricolage font-bold text-white text-lg">Your Badges</p>
+          <button className="text-purple text-sm font-jakarta font-semibold">View all →</button>
+        </div>
+        <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2">
+          {BADGES.map((badge) => (
+            <div
+              key={badge.title}
+              className={`flex-shrink-0 w-24 flex flex-col items-center gap-2 rounded-2xl border p-4 ${
+                badge.earned
+                  ? "bg-white/[0.05] border-white/[0.10]"
+                  : "bg-white/[0.02] border-white/[0.05]"
+              }`}
+            >
+              <span className={`text-3xl ${!badge.earned ? "opacity-40 grayscale" : ""}`}>
+                {badge.emoji}
+              </span>
+              <p className={`font-jakarta font-semibold text-xs text-center leading-tight ${badge.earned ? "text-white" : "text-white/30"}`}>
+                {badge.title}
+              </p>
+              <span className={`text-[10px] font-jakarta font-bold ${badge.earned ? "text-lime" : "text-white/20"}`}>
+                {badge.sub}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
