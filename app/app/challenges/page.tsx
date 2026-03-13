@@ -5,7 +5,7 @@ import { useState } from "react";
 const CHALLENGES = [
   {
     id: "1",
-    brand: "Resy",
+    brand: "RESY x COME WITH ME",
     title: "Omakase Tour NYC",
     description: "Visit 5 omakase restaurants saved from Resy-featured creators",
     reward: "Priority reservation access + $75 dining credit",
@@ -21,15 +21,15 @@ const CHALLENGES = [
     title: "Best Coffee in Brooklyn",
     description: "Check in at 4 top-rated coffee spots across Brooklyn",
     reward: "Free week of flat whites",
-    progress: 1,
+    progress: 0,
     total: 4,
-    started: true,
+    started: false,
     badgeEmoji: "☕",
     daysLeft: 7,
   },
   {
     id: "3",
-    brand: "Depop",
+    brand: "DEPOP x COME WITH ME",
     title: "Thrift Tour East Village",
     description: "Save 6 vintage & thrift spots in the East Village",
     reward: "0% selling fees for 30 days",
@@ -161,7 +161,7 @@ export default function ChallengesPage() {
                 <span className="text-white/50 text-[10px] font-jakarta">{badge.label}</span>
               </div>
             ))}
-            {["🏆", "💎"].map((emoji) => (
+            {["🏆"].map((emoji) => (
               <div key={emoji} className="flex flex-col items-center gap-2">
                 <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-dashed border-white/15 flex items-center justify-center opacity-20 text-2xl">
                   {emoji}
