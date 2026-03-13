@@ -1,7 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { CHALLENGES } from "@/lib/mock-data";
+
+const CHALLENGES = [
+  {
+    id: "1",
+    brand: "Resy",
+    title: "Omakase Tour NYC",
+    description: "Visit 5 omakase restaurants saved from Resy-featured creators",
+    reward: "Priority reservation access + $75 dining credit",
+    progress: 3,
+    total: 5,
+    started: true,
+    badgeEmoji: "🍣",
+    daysLeft: 4,
+  },
+  {
+    id: "2",
+    brand: "Bluestone Lane",
+    title: "Best Coffee in Brooklyn",
+    description: "Check in at 4 top-rated coffee spots across Brooklyn",
+    reward: "Free week of flat whites",
+    progress: 1,
+    total: 4,
+    started: true,
+    badgeEmoji: "☕",
+    daysLeft: 7,
+  },
+  {
+    id: "3",
+    brand: "Depop",
+    title: "Thrift Tour East Village",
+    description: "Save 6 vintage & thrift spots in the East Village",
+    reward: "0% selling fees for 30 days",
+    progress: 0,
+    total: 6,
+    started: false,
+    badgeEmoji: "🛍️",
+    daysLeft: 10,
+  },
+];
 
 const EARNED_BADGES = [
   { emoji: "🌍", label: "Explorer", color: "from-purple-700 to-indigo-700" },
@@ -9,169 +47,129 @@ const EARNED_BADGES = [
   { emoji: "☕", label: "Caffeine", color: "from-amber-700 to-orange-700" },
 ];
 
-const LOCKED_BADGES = [
-  { emoji: "🏆", label: "Champion" },
-  { emoji: "💎", label: "Hidden" },
-];
-
-function ProgressBar({ value, total }: { value: number; total: number }) {
-  const pct = Math.min((value / total) * 100, 100);
-  return (
-    <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-      <div
-        className="h-full rounded-full bg-lime transition-all duration-700"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
-
 export default function ChallengesPage() {
-  const [expanded, setExpanded] = useState<string | null>(CHALLENGES[0].id);
+  const [activeId, setActiveId] = useState("1");
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pb-8">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6">
-        <p className="text-white/40 text-xs font-jakarta uppercase tracking-widest mb-1">Brand Partnerships</p>
-        <h1 className="font-bricolage font-extrabold text-3xl text-white leading-tight">
-          Challenges
-        </h1>
-        <p className="text-white/40 font-jakarta text-sm mt-1">
-          Explore the city, earn exclusive rewards
+      <div className="px-5 pt-14 pb-5">
+        <p className="text-lime text-xs font-jakarta font-semibold uppercase tracking-widest mb-1">
+          LIVE · 3 ACTIVE CHALLENGES
         </p>
+        <h1 className="font-bricolage font-extrabold text-3xl text-white leading-tight">
+          Explore &{" "}
+          <span className="italic text-lime">Earn</span>
+        </h1>
       </div>
 
-      {/* Active challenges */}
-      <div className="px-5 pb-6">
-        <div className="flex flex-col gap-3">
-          {CHALLENGES.map((challenge) => {
-            const isExpanded = expanded === challenge.id;
-            const pct = Math.round((challenge.progress / challenge.total) * 100);
+      {/* Challenge cards */}
+      <div className="px-5 flex flex-col gap-3 pb-6">
+        {CHALLENGES.map((c) => {
+          const isActive = activeId === c.id;
+          const pct = c.total > 0 ? Math.round((c.progress / c.total) * 100) : 0;
 
-            return (
-              <div
-                key={challenge.id}
-                className={`rounded-2xl border overflow-hidden transition-all duration-200 ${
-                  isExpanded
-                    ? "border-lime/30 bg-white/[0.05]"
-                    : "border-white/[0.07] bg-white/[0.03]"
-                }`}
+          return (
+            <div
+              key={c.id}
+              className={`rounded-2xl border overflow-hidden transition-all ${
+                isActive ? "border-lime/30 bg-white/[0.05]" : "border-white/[0.07] bg-white/[0.03]"
+              }`}
+            >
+              <button
+                className="w-full text-left p-4"
+                onClick={() => setActiveId(isActive ? "" : c.id)}
               >
-                <button
-                  onClick={() => setExpanded(isExpanded ? null : challenge.id)}
-                  className="w-full text-left p-4"
-                >
-                  {/* Brand label */}
-                  <p className="text-white/30 text-[10px] font-jakarta uppercase tracking-widest mb-2">
-                    {challenge.brand}
-                  </p>
+                {/* Brand */}
+                <p className="text-white/30 text-[10px] font-jakarta uppercase tracking-widest mb-2">
+                  {c.brand}
+                </p>
 
-                  {/* Top row */}
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-xl bg-lime/10 border border-lime/20 flex items-center justify-center text-2xl flex-shrink-0">
-                      {challenge.badgeEmoji}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-bricolage font-bold text-white text-base leading-tight">
-                          {challenge.title}
-                        </p>
-                        <span className="flex-shrink-0 text-[10px] font-jakarta font-semibold text-lime/80 bg-lime/10 border border-lime/20 px-2 py-0.5 rounded-full">
-                          {challenge.daysLeft}d left
-                        </span>
-                      </div>
-                      <p className="text-white/40 text-xs font-jakarta mt-1 line-clamp-1">
-                        {challenge.progress} / {challenge.total} completed
+                {/* Title row */}
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-xl bg-lime/10 border border-lime/20 flex items-center justify-center text-xl flex-shrink-0">
+                    {c.badgeEmoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-bricolage font-bold text-white text-base leading-tight">
+                        {c.title}
                       </p>
+                      <span className="flex-shrink-0 text-[10px] font-jakarta font-semibold text-lime/70 bg-lime/10 border border-lime/20 px-2 py-0.5 rounded-full">
+                        {c.daysLeft}d left
+                      </span>
                     </div>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <ProgressBar value={challenge.progress} total={challenge.total} />
-                    </div>
-                    <span className="text-lime text-xs font-jakarta font-bold flex-shrink-0">
-                      {pct}%
-                    </span>
-                  </div>
-                </button>
-
-                {/* Expanded */}
-                {isExpanded && (
-                  <div className="px-4 pb-4 border-t border-white/[0.06] pt-4 flex flex-col gap-3">
-                    <p className="text-white/55 font-jakarta text-sm leading-relaxed">
-                      {challenge.description}
+                    <p className="text-white/40 text-xs font-jakarta mt-0.5">
+                      {c.started ? `${c.progress} / ${c.total} completed` : "Not started"}
                     </p>
+                  </div>
+                </div>
 
-                    {/* Reward pill */}
-                    <div className="flex items-center gap-3 bg-lime/[0.07] border border-lime/20 rounded-xl px-4 py-3">
-                      <div className="flex-1">
-                        <p className="text-white/40 text-[10px] font-jakarta uppercase tracking-widest">Reward</p>
-                        <p className="font-jakarta font-semibold text-white text-sm mt-0.5">
-                          {challenge.reward}
-                        </p>
-                      </div>
+                {/* Progress bar */}
+                {c.started && (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-lime rounded-full transition-all duration-700"
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
-
-                    <button className="w-full bg-lime text-dark font-bricolage font-bold text-base py-3 rounded-xl active:scale-95 transition-all">
-                      View Challenge Map →
-                    </button>
+                    <span className="text-lime text-xs font-jakarta font-bold">{pct}%</span>
                   </div>
                 )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              </button>
 
-      {/* Completed */}
-      <div className="px-5 pb-6">
-        <h2 className="font-bricolage font-bold text-white/60 text-sm uppercase tracking-widest mb-3">
-          Completed
-        </h2>
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-lime/10 border border-lime/20 flex items-center justify-center text-xl">
-            ✅
-          </div>
-          <div className="flex-1">
-            <p className="font-bricolage font-bold text-white text-sm">West Village Weekend</p>
-            <p className="text-white/30 text-xs font-jakarta mt-0.5">Completed Feb 28 · NYC Food Guide</p>
-          </div>
-          <span className="text-xl">🏆</span>
-        </div>
+              {/* Expanded */}
+              {isActive && (
+                <div className="px-4 pb-4 pt-1 border-t border-white/[0.06] flex flex-col gap-3">
+                  <p className="text-white/55 font-jakarta text-sm leading-relaxed">
+                    {c.description}
+                  </p>
+                  <div className="flex items-center gap-3 bg-lime/[0.07] border border-lime/20 rounded-xl px-4 py-3">
+                    <span className="text-lg">🎁</span>
+                    <div>
+                      <p className="text-white/40 text-[10px] font-jakarta uppercase tracking-wide">Reward</p>
+                      <p className="font-jakarta font-semibold text-white text-sm">{c.reward}</p>
+                    </div>
+                  </div>
+                  {c.started ? (
+                    <button className="w-full bg-lime text-dark font-bricolage font-bold text-base py-3 rounded-xl active:scale-95 transition-all">
+                      View Map →
+                    </button>
+                  ) : (
+                    <button className="w-full bg-purple text-white font-bricolage font-bold text-base py-3 rounded-xl active:scale-95 transition-all">
+                      Join
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Badge shelf */}
-      <div className="px-5 pb-8">
-        <h2 className="font-bricolage font-bold text-white/60 text-sm uppercase tracking-widest mb-3">
-          Your Badges
-        </h2>
+      <div className="px-5">
+        <p className="text-white/40 text-xs font-jakarta uppercase tracking-widest mb-3">Your Badges</p>
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
           <div className="flex gap-4">
             {EARNED_BADGES.map((badge) => (
               <div key={badge.label} className="flex flex-col items-center gap-2">
-                <div
-                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center text-2xl shadow-lg shadow-black/40`}
-                >
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center text-2xl shadow-lg shadow-black/40`}>
                   {badge.emoji}
                 </div>
                 <span className="text-white/50 text-[10px] font-jakarta">{badge.label}</span>
               </div>
             ))}
-            {LOCKED_BADGES.map((badge) => (
-              <div key={badge.label} className="flex flex-col items-center gap-2">
-                <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-dashed border-white/15 flex items-center justify-center text-xl">
-                  <span className="opacity-20 text-2xl">{badge.emoji}</span>
+            {["🏆", "💎"].map((emoji) => (
+              <div key={emoji} className="flex flex-col items-center gap-2">
+                <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-dashed border-white/15 flex items-center justify-center opacity-20 text-2xl">
+                  {emoji}
                 </div>
-                <span className="text-white/20 text-[10px] font-jakarta">{badge.label}</span>
+                <span className="text-white/20 text-[10px] font-jakarta">Locked</span>
               </div>
             ))}
           </div>
-          <p className="text-white/25 text-xs font-jakarta mt-3">
-            Complete challenges to unlock more badges
-          </p>
         </div>
       </div>
     </div>

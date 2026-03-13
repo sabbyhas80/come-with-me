@@ -30,7 +30,7 @@ export default function MapView({ onSelectPlace }: Props) {
   if (!token) {
     return (
       <div
-        style={{ width: "100vw", height: "100vh" }}
+        style={{ width: "100%", height: "100%" }}
         className="bg-[#0d0d0f] flex items-center justify-center"
       >
         <div className="flex flex-col items-center gap-3 text-center px-8">
@@ -46,7 +46,7 @@ export default function MapView({ onSelectPlace }: Props) {
     <Map
       mapboxAccessToken={token}
       initialViewState={{ longitude: -73.9857, latitude: 40.7484, zoom: 12.5 }}
-      style={{ width: "100vw", height: "100vh" }}
+      style={{ width: "100%", height: "100%" }}
       mapStyle="mapbox://styles/mapbox/dark-v11"
       attributionControl={false}
     >

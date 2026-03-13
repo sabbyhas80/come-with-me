@@ -143,8 +143,8 @@ export const LISTS: PlaceList[] = [
     emoji: "✈️",
     placeCount: 24,
     gradient: "from-red-600 to-rose-700",
-    collaborators: ["S"],
-    isShared: false,
+    collaborators: ["S", "M", "K"],
+    isShared: true,
   },
   {
     id: "4",
