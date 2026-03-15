@@ -1,0 +1,39 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "./supabase";
+
+export function useUser() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return { user, loading };
+}
+
+export async function signInWithGoogle() {
+  const redirectTo = `${window.location.origin}/auth/callback`;
+  return supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo },
+  });
+}
+
+export async function signOut() {
+  return supabase.auth.signOut();
+}
