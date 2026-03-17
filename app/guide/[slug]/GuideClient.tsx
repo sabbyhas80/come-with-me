@@ -299,7 +299,7 @@ export default function GuideClient({ guide, places }: { guide: Guide; places: P
 function PlaceCard({ place, index, isSelected, onSelect }: { place: Place; index: number; isSelected: boolean; onSelect: () => void }) {
   const cat = getCat(place.category);
   return (
-    <div onClick={onSelect} className="rounded-2xl transition-all cursor-pointer"
+    <button type="button" onClick={onSelect} className="rounded-2xl transition-all cursor-pointer w-full text-left"
       style={{ background: "white", border: `1.5px solid ${isSelected ? cat.color : "#F3F4F6"}`, boxShadow: isSelected ? `0 4px 20px ${cat.color}20` : "0 1px 4px rgba(0,0,0,0.04)", transform: isSelected ? "scale(1.01)" : "scale(1)", transition: "all 0.2s ease" }}>
       <div className="p-4 flex gap-4">
         <div className="flex-shrink-0 flex flex-col items-center gap-2">
@@ -326,6 +326,6 @@ function PlaceCard({ place, index, isSelected, onSelect }: { place: Place; index
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
