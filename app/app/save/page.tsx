@@ -45,21 +45,13 @@ const SOURCES: { value: Source; label: string }[] = [
 async function geocodeAddress(
   address: string
 ): Promise<{ lat: number; lng: number }> {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-  if (!token) return { lat: 40.7484, lng: -73.9857 };
-
   try {
-    const query = encodeURIComponent(`${address}, New York, NY`);
     const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${token}&limit=1`
+      `/api/geocode?query=${encodeURIComponent(address)}`
     );
     const data = await res.json();
-    if (data.features?.length > 0) {
-      const [lng, lat] = data.features[0].center;
-      return { lat, lng };
-    }
+    if (data.lat && data.lng) return { lat: data.lat, lng: data.lng };
   } catch {}
-
   return { lat: 40.7484, lng: -73.9857 };
 }
 
@@ -142,7 +134,7 @@ export default function SavePage() {
     setSaving(true);
 
     try {
-      const coords = await geocodeAddress(`${result.neighborhood}, ${result.city}`);
+      const coords = await geocodeAddress(`${result.name}, ${result.neighborhood}, ${result.city}`);
 
       const { data: place, error: placeError } = await supabase
         .from("places")

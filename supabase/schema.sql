@@ -34,14 +34,14 @@ create policy "Anyone can read places"
   on places for select using (true);
 
 create policy "Authenticated users can insert places"
-  on places for insert with check (auth.role() = 'authenticated');
+  on places for insert with check ((select auth.uid()) is not null);
 
 -- Saved places: users can only see and manage their own
 create policy "Users can view their saved places"
-  on saved_places for select using (auth.uid() = user_id);
+  on saved_places for select using ((select auth.uid()) = user_id);
 
 create policy "Users can insert their saved places"
-  on saved_places for insert with check (auth.uid() = user_id);
+  on saved_places for insert with check ((select auth.uid()) = user_id);
 
 create policy "Users can delete their saved places"
-  on saved_places for delete using (auth.uid() = user_id);
+  on saved_places for delete using ((select auth.uid()) = user_id);

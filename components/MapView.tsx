@@ -9,11 +9,13 @@ export interface MapPlace {
   category: string;
   latitude: number;
   longitude: number;
+  creator_handle?: string;
 }
 
 interface Props {
   onSelectPlace: (id: string) => void;
   places: MapPlace[];
+  selectedId?: string | null;
 }
 
 function categoryEmoji(category: string) {
@@ -26,26 +28,23 @@ function categoryEmoji(category: string) {
   return "📍";
 }
 
-export default function MapView({ onSelectPlace, places }: Props) {
+function categoryColor(category: string) {
+  const cat = (category || "").toLowerCase();
+  if (cat === "restaurant" || cat === "restaurants") return "#FF6B6B";
+  if (cat === "coffee") return "#C8956C";
+  if (cat === "bar" || cat === "bars") return "#A78BFA";
+  if (cat === "shopping") return "#34D399";
+  if (cat === "attraction") return "#60A5FA";
+  return "#7B2FFF";
+}
+
+export default function MapView({ onSelectPlace, places, selectedId }: Props) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
   if (!token) {
     return (
-      <div
-        style={{ width: "100%", height: "100%" }}
-        className="bg-[#0d0d0f] flex items-center justify-center"
-      >
-        <div className="flex flex-col items-center gap-3 text-center px-8">
-          <div className="w-14 h-14 rounded-2xl bg-purple/20 border border-purple/30 flex items-center justify-center text-3xl">
-            🗺️
-          </div>
-          <p className="font-bricolage font-bold text-white text-lg">
-            Map Preview
-          </p>
-          <p className="text-white/40 font-jakarta text-sm">
-            Add NEXT_PUBLIC_MAPBOX_TOKEN to enable
-          </p>
-        </div>
+      <div style={{ width: "100%", height: "100%" }} className="bg-[#e8e0d8] flex items-center justify-center">
+        <p className="font-bricolage font-bold text-gray-600">Add NEXT_PUBLIC_MAPBOX_TOKEN to enable</p>
       </div>
     );
   }
@@ -53,37 +52,63 @@ export default function MapView({ onSelectPlace, places }: Props) {
   return (
     <Map
       mapboxAccessToken={token}
-      initialViewState={{ longitude: -73.9857, latitude: 40.7484, zoom: 12.5 }}
+      initialViewState={{ longitude: -73.9857, latitude: 40.7484, zoom: 13.5 }}
       style={{ width: "100%", height: "100%" }}
-      mapStyle="mapbox://styles/mapbox/dark-v11"
+      mapStyle="mapbox://styles/mapbox/light-v11"
       attributionControl={false}
     >
-      {places.map((place) => (
-        <Marker
-          key={place.id}
-          longitude={place.longitude}
-          latitude={place.latitude}
-          onClick={() => onSelectPlace(place.id)}
-        >
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              background: "#7B2FFF",
-              border: "2px solid #CAFF33",
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 15,
-              cursor: "pointer",
-              boxShadow: "0 4px 16px rgba(123,47,255,0.55)",
-            }}
+      {places.map((place) => {
+        const isSelected = place.id === selectedId;
+        const color = categoryColor(place.category);
+        return (
+          <Marker
+            key={place.id}
+            longitude={place.longitude}
+            latitude={place.latitude}
+            onClick={() => onSelectPlace(place.id)}
+            anchor="bottom"
           >
-            {categoryEmoji(place.category)}
-          </div>
-        </Marker>
-      ))}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }}>
+              <div style={{
+                background: "white",
+                borderRadius: 20,
+                padding: "3px 8px",
+                marginBottom: 4,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                transform: isSelected ? "scale(1.1)" : "scale(1)",
+                transition: "transform 0.15s ease",
+                border: isSelected ? `2px solid ${color}` : "2px solid transparent",
+              }}>
+                <span style={{ fontSize: 11 }}>{categoryEmoji(place.category)}</span>
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#1a1a1a",
+                  whiteSpace: "nowrap",
+                  maxWidth: 100,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontFamily: "sans-serif",
+                }}>
+                  {place.name}
+                </span>
+              </div>
+              <div style={{
+                width: isSelected ? 14 : 10,
+                height: isSelected ? 14 : 10,
+                borderRadius: "50%",
+                background: color,
+                border: "2px solid white",
+                boxShadow: `0 2px 8px ${color}88`,
+                transition: "all 0.15s ease",
+              }} />
+            </div>
+          </Marker>
+        );
+      })}
     </Map>
   );
 }
