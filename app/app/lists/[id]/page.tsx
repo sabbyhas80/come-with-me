@@ -1,131 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { useUser } from "@/lib/auth";
+import Link from "next/link";
+import { LISTS, PLACES, TOKYO_PLACES } from "@/lib/mock-data";
 
-interface Place {
-  id: string;
-  name: string;
-  neighborhood: string | null;
-  city: string | null;
-  category: string | null;
-  description: string | null;
-  creator_handle: string | null;
-  source: string | null;
-  latitude: number | null;
-  longitude: number | null;
-}
-
-interface List {
-  id: string;
-  title: string;
-  description: string | null;
-  city: string | null;
-  cover_emoji: string | null;
-  is_public: boolean;
-  slug: string | null;
-  user_id: string;
-}
+const MOCK_LIST_PLACES: Record<string, any[]> = {
+  "1": PLACES.filter((p) => ["1","2","3","7","8","9","10","11","12"].includes(p.id)).map(p => ({
+    id: p.id, name: p.name, neighborhood: p.neighborhood, category: p.category,
+    description: p.description, creator_handle: p.creator, gradient: p.gradient, rating: p.rating,
+  })),
+  "2": TOKYO_PLACES,
+  "3": PLACES.filter((p) => p.category === "Coffee").map(p => ({
+    id: p.id, name: p.name, neighborhood: p.neighborhood, category: p.category,
+    description: p.description, creator_handle: p.creator, gradient: p.gradient, rating: p.rating,
+  })),
+  "4": PLACES.filter((p) => ["1","2","10","4","5"].includes(p.id)).map(p => ({
+    id: p.id, name: p.name, neighborhood: p.neighborhood, category: p.category,
+    description: p.description, creator_handle: p.creator, gradient: p.gradient, rating: p.rating,
+  })),
+};
 
 function categoryEmoji(category: string) {
   const cat = (category || "").toLowerCase();
   if (cat === "coffee") return "☕";
   if (cat === "bar" || cat === "bars") return "🍸";
   if (cat === "shopping") return "🛍️";
-  if (cat === "attraction") return "🎭";
   return "🍽️";
 }
 
+const RECENT_ACTIVITY: Record<string, any[]> = {
+  "2": [
+    { user: "Alex", action: "added Senso-ji Temple", time: "2 hours ago", source: "Instagram @tokyolife" },
+    { user: "Sarah", action: "added Ace Hotel Tokyo", time: "5 hours ago", source: "Instagram @acehotels" },
+  ],
+};
+
 export default function ListDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useUser();
-  const [list, setList] = useState<List | null>(null);
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [savedPlaces, setSavedPlaces] = useState<Place[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddPlaces, setShowAddPlaces] = useState(false);
-  const [adding, setAdding] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    fetchList();
-  }, [id]);
-
-  useEffect(() => {
-    if (user && showAddPlaces) fetchSavedPlaces();
-  }, [user, showAddPlaces]);
-
-  async function fetchList() {
-    const { data: listData } = await supabase
-      .from("lists")
-      .select("*")
-      .eq("id", id)
-      .single();
-    if (listData) setList(listData);
-
-    const { data: placesData } = await supabase
-      .from("list_places")
-      .select("place_id, position, places(*)")
-      .eq("list_id", id)
-      .order("position");
-
-    if (placesData) {
-      const flat = placesData.map((row: any) => row.places).filter(Boolean);
-      setPlaces(flat);
-    }
-    setLoading(false);
-  }
-
-  async function fetchSavedPlaces() {
-    const { data } = await supabase
-      .from("saved_places")
-      .select("places(*)")
-      .eq("user_id", user!.id);
-    if (data) {
-      const flat = data.map((row: any) => row.places).filter(Boolean);
-      setSavedPlaces(flat);
-    }
-  }
-
-  async function addPlaceToList(placeId: string) {
-    setAdding(placeId);
-    await supabase.from("list_places").insert({
-      list_id: id,
-      place_id: placeId,
-      position: places.length,
-    });
-    await fetchList();
-    setAdding(null);
-  }
-
-  async function removePlaceFromList(placeId: string) {
-    await supabase
-      .from("list_places")
-      .delete()
-      .eq("list_id", id)
-      .eq("place_id", placeId);
-    await fetchList();
-  }
-
-  function copyShareLink() {
-    const url = `${window.location.origin}/list/${list?.slug || id}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  const placesInList = new Set(places.map((p) => p.id));
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 rounded-full border-2 border-purple border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  const list = LISTS.find((l) => l.id === id);
+  const places = MOCK_LIST_PLACES[id] || [];
+  const activity = RECENT_ACTIVITY[id] || [];
 
   if (!list) {
     return (
@@ -136,130 +50,97 @@ export default function ListDetailPage() {
     );
   }
 
+  const isTokyoTrip = id === "2";
+
   return (
     <div className="flex flex-col min-h-screen pb-24">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6">
-        <Link href="/app/lists" className="flex items-center gap-2 text-white/40 font-jakarta text-sm mb-4">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          My Lists
-        </Link>
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-purple/20 flex items-center justify-center text-3xl flex-shrink-0">
-            {list.cover_emoji || "📍"}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bricolage font-extrabold text-white text-2xl leading-tight">{list.title}</h1>
-            {list.description && (
-              <p className="text-white/40 text-sm font-jakarta mt-1">{list.description}</p>
-            )}
-            <p className="text-white/30 text-xs font-jakarta mt-1">{places.length} place{places.length !== 1 ? "s" : ""} · {list.city || "New York"}</p>
-          </div>
+      <div className={`px-5 pt-14 pb-6 bg-gradient-to-br ${list.gradient}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <h1 className="font-bricolage font-extrabold text-white text-2xl">{list.name}</h1>
         </div>
-
-        {/* Action buttons */}
+        <p className="text-white/60 text-sm font-jakarta">
+          {places.length} places · {list.collaborators.length} collaborators · Last updated 1h ago
+        </p>
         <div className="flex gap-2 mt-4">
-          <button
-            onClick={copyShareLink}
-            className="flex-1 flex items-center justify-center gap-2 bg-purple/20 border border-purple/40 rounded-xl py-3 text-purple font-jakarta font-semibold text-sm"
-          >
-            {copied ? "✓ Copied!" : "🔗 Share List"}
+          <button className="flex items-center gap-2 bg-white/20 backdrop-blur border border-white/30 rounded-full px-4 py-2 text-white font-jakarta font-semibold text-sm">
+            🔗 Share
           </button>
-          {user && list.user_id === user.id && (
-            <button
-              onClick={() => setShowAddPlaces(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-lime/20 border border-lime/40 rounded-xl py-3 text-lime font-jakarta font-semibold text-sm"
-            >
-              + Add Places
-            </button>
-          )}
+          <button className="flex items-center gap-2 bg-lime text-dark rounded-full px-4 py-2 font-jakarta font-semibold text-sm">
+            + Add Place
+          </button>
         </div>
       </div>
+
+      {/* Collaborators */}
+      {list.collaborators.length > 1 && (
+        <div className="mx-5 mt-4 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex">
+              {list.collaborators.map((c, i) => (
+                <div key={i} className="w-8 h-8 rounded-full bg-purple flex items-center justify-center text-xs font-bold text-white -ml-1 first:ml-0 border-2 border-black">
+                  {c}
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-white font-jakarta font-semibold text-sm">
+                {id === "2" ? "You, Alex, Sarah" : list.collaborators.join(", ")}
+              </p>
+              <p className="text-white/40 text-xs font-jakarta">Can edit · {list.collaborators.length} collaborators</p>
+            </div>
+          </div>
+          <button className="bg-purple text-white font-jakarta font-semibold text-xs px-4 py-2 rounded-full">
+            + Invite
+          </button>
+        </div>
+      )}
 
       {/* Places */}
-      <div className="px-5 flex flex-col gap-2">
-        {places.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-12 text-center">
-            <span className="text-4xl">📍</span>
-            <p className="font-bricolage font-bold text-white">No places yet</p>
-            <p className="text-white/40 font-jakarta text-sm">Add your saved places to this list!</p>
-            <button
-              onClick={() => setShowAddPlaces(true)}
-              className="bg-purple text-white font-jakarta font-semibold px-6 py-3 rounded-xl mt-2"
-            >
-              Add Places
-            </button>
-          </div>
-        )}
-        {places.map((place, i) => (
-          <div key={place.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-3">
-            <div className="w-10 h-10 rounded-xl bg-purple/20 flex-shrink-0 flex items-center justify-center">
-              <span className="text-base">{categoryEmoji(place.category ?? "")}</span>
+      <div className="px-5 mt-4">
+        <h2 className="font-bricolage font-bold text-white text-lg mb-3">Places</h2>
+        <div className="flex flex-col gap-2">
+          {places.map((place: any) => (
+            <div key={place.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-3">
+              <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-xl ${place.gradient ? `bg-gradient-to-br ${place.gradient}` : "bg-purple/20"}`}>
+                {place.emoji || categoryEmoji(place.category ?? "")}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bricolage font-bold text-white text-sm truncate">{place.name}</p>
+                <p className="text-white/40 text-xs font-jakarta">
+                  {place.neighborhood}
+                  {place.creator && <span className="text-purple"> · {place.creator}</span>}
+                  {place.creator_handle && !place.creator && (
+                    place.creator_handle.startsWith("Added by")
+                      ? <span className="text-purple font-semibold"> · {place.creator_handle}</span>
+                      : <span className="text-purple"> · {place.creator_handle}</span>
+                  )}
+                </p>
+              </div>
+              <span className="text-xl">{place.saved ? "❤️" : "🤍"}</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bricolage font-bold text-white text-sm truncate">{place.name}</p>
-              <p className="text-white/40 text-xs font-jakarta">{place.neighborhood}{place.creator_handle ? ` · ${place.creator_handle}` : ""}</p>
-            </div>
-            {user && list.user_id === user.id && (
-              <button
-                onClick={() => removePlaceFromList(place.id)}
-                className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="#ffffff40" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* Add places modal */}
-      {showAddPlaces && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end" style={{ maxWidth: 430, left: "50%", transform: "translateX(-50%)" }}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddPlaces(false)} />
-          <div className="relative bg-[#18181b] rounded-t-3xl border-t border-white/10 flex flex-col" style={{ height: "70vh" }}>
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 bg-white/20 rounded-full" />
-            </div>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.07]">
-              <h2 className="font-bricolage font-bold text-white text-lg">Add Places</h2>
-              <button onClick={() => setShowAddPlaces(false)} className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2">
-              {savedPlaces.length === 0 && (
-                <p className="text-white/40 font-jakarta text-sm text-center py-8">No saved places yet. Save some places first!</p>
-              )}
-              {savedPlaces.map((place) => {
-                const inList = placesInList.has(place.id);
-                return (
-                  <div key={place.id} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple/20 flex-shrink-0 flex items-center justify-center">
-                      <span className="text-base">{categoryEmoji(place.category ?? "")}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bricolage font-bold text-white text-sm truncate">{place.name}</p>
-                      <p className="text-white/40 text-xs font-jakarta">{place.neighborhood}</p>
-                    </div>
-                    <button
-                      onClick={() => !inList && addPlaceToList(place.id)}
-                      disabled={inList || adding === place.id}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-jakarta font-semibold transition-all ${
-                        inList ? "bg-lime/20 text-lime border border-lime/30" : "bg-purple text-white"
-                      }`}
-                    >
-                      {inList ? "✓ Added" : adding === place.id ? "..." : "Add"}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+      {/* Recent Activity */}
+      {activity.length > 0 && (
+        <div className="px-5 mt-6">
+          <h2 className="font-bricolage font-bold text-white text-lg mb-3">Recent Activity</h2>
+          <div className="flex flex-col gap-2">
+            {activity.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-3">
+                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                  {item.user[0]}
+                </div>
+                <div>
+                  <p className="text-white font-jakarta font-semibold text-sm">
+                    {item.user} {item.action}
+                  </p>
+                  <p className="text-white/40 text-xs font-jakarta">{item.time} · from {item.source}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

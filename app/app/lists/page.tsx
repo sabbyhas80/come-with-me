@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LISTS } from "@/lib/mock-data";
 
 export default function ListsPage() {
   const [lists] = useState(LISTS);
+  const router = useRouter();
 
   return (
     <div className="flex flex-col min-h-screen pb-24">
@@ -18,16 +20,10 @@ export default function ListsPage() {
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="px-5 pb-4">
         <div className="flex gap-6 border-b border-white/10">
           {["MINE", "SHARED", "FOLLOWING"].map((tab, i) => (
-            <button
-              key={tab}
-              className={`pb-3 text-xs font-jakarta font-bold tracking-widest ${
-                i === 0 ? "text-white border-b-2 border-purple" : "text-white/30"
-              }`}
-            >
+            <button key={tab} className={`pb-3 text-xs font-jakarta font-bold tracking-widest ${i === 0 ? "text-white border-b-2 border-purple" : "text-white/30"}`}>
               {tab}
             </button>
           ))}
@@ -38,9 +34,16 @@ export default function ListsPage() {
         {lists.map((list) => (
           <div
             key={list.id}
-            className="rounded-2xl overflow-hidden bg-white/[0.04] border border-white/[0.08]"
+            onClick={() => router.push(`/app/lists/${list.id}`)}
+            className="rounded-2xl overflow-hidden bg-white/[0.04] border border-white/[0.08] active:scale-[0.98] transition-all cursor-pointer"
           >
-            <div className={`h-28 bg-gradient-to-br ${list.gradient} flex items-center justify-end pr-4`}>
+            <div className={`h-28 bg-gradient-to-br ${list.gradient} flex items-center justify-between px-5`}>
+              <div className="flex gap-2 text-4xl">
+                {list.id === "1" && <><span>🍣</span><span>🍕</span><span>🥂</span></>}
+                {list.id === "2" && <><span>✈️</span><span>🌍</span><span>🏨</span></>}
+                {list.id === "3" && <><span>☕</span><span>📚</span><span>💻</span></>}
+                {list.id === "4" && <><span>🕯️</span><span>🍷</span><span>🌹</span></>}
+              </div>
               <span className="text-white/20 font-bricolage font-extrabold text-6xl">{list.placeCount}</span>
             </div>
             <div className="p-4 flex items-center justify-between">
@@ -53,17 +56,12 @@ export default function ListsPage() {
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   {list.isPrivate && (
-                    <span className="text-xs font-jakarta font-bold text-white/40 bg-white/10 px-2 py-0.5 rounded-full">
-                      🔒 PRIVATE
-                    </span>
+                    <span className="text-xs font-jakarta font-bold text-white/40 bg-white/10 px-2 py-0.5 rounded-full">🔒 PRIVATE</span>
                   )}
                   {list.collaborators.length > 1 && (
                     <div className="flex items-center gap-1">
                       {list.collaborators.map((c, i) => (
-                        <div
-                          key={i}
-                          className="w-5 h-5 rounded-full bg-purple flex items-center justify-center text-[9px] font-bold text-white -ml-1 first:ml-0 border border-black"
-                        >
+                        <div key={i} className="w-6 h-6 rounded-full bg-purple flex items-center justify-center text-[10px] font-bold text-white -ml-1 first:ml-0 border-2 border-black">
                           {c}
                         </div>
                       ))}
